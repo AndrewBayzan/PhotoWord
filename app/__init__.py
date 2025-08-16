@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint
-from app.extensions import db
+from app.extensions import db, migrate
 from app.models import Users
 
 
@@ -8,6 +8,7 @@ def create_app():
     app.config.from_object("config.Config")
 
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from .blueprints.main import main
     from .blueprints.register import auth
@@ -15,7 +16,8 @@ def create_app():
     app.register_blueprint(main)
     app.register_blueprint(auth)
 
-    # with app.app_context():
+
+
     return app   
 
 
