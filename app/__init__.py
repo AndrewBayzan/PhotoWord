@@ -1,6 +1,6 @@
 from flask import Flask, Blueprint
 from app.extensions import db, migrate
-from app.models import Users
+from app.models import Users, Words
 
 
 def create_app():
@@ -12,9 +12,11 @@ def create_app():
 
     from .blueprints.main import main
     from .blueprints.register import auth
+    from .blueprints.dict import dict_bp
 
     app.register_blueprint(main)
     app.register_blueprint(auth)
+    app.register_blueprint(dict_bp)
 
 
 

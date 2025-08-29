@@ -16,5 +16,5 @@ def test_register():
         print(f"Статус ответа: {response.status_code}")
         print(f"Содержимое ответа: {response.data.decode('utf-8')}")
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     test_register()
