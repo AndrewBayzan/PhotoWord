@@ -17,27 +17,27 @@
 
     <h3>
       {% if is_correct %}
-        <span class="text-success">✅ Правильно!</span>
+        <span class="text-success">✅ Correct!</span>
       {% else %}
-        <span class="text-danger">❌ Неверно</span>
+        <span class="text-danger">❌ Incorrect</span>
       {% endif %}
     </h3>
 
-    <p><strong>Ваш ответ:</strong> {{ user_answer or "—" }}</p>
-    <p><strong>Правильный ответ:</strong> {{ correct_answer }}</p>
+    <p><strong>Your answer:</strong> {{ user_answer or "—" }}</p>
+    <p><strong>Correct answer:</strong> {{ correct_answer }}</p>
 
     {% if next_index < total %}
-      <a href="{{ url_for('tests_bp.run', index=next_index) }}" class="btn btn-primary mt-3" id="next-btn">Следующее</a>
-      <div class="mt-2 text-muted small">💡 Нажмите Enter для перехода к следующему вопросу</div>
+      <a href="{{ url_for('tests_bp.run', index=next_index) }}" class="btn btn-primary mt-3" id="next-btn">Next</a>
+      <div class="mt-2 text-muted small">💡 Press Enter to go to the next question</div>
     {% else %}
-      <a href="{{ url_for('tests_bp.finish') }}" class="btn btn-success mt-3" id="finish-btn">Завершить</a>
-      <div class="mt-2 text-muted small">💡 Нажмите Enter для завершения теста</div>
+      <a href="{{ url_for('tests_bp.finish') }}" class="btn btn-success mt-3" id="finish-btn">Finish</a>
+      <div class="mt-2 text-muted small">💡 Press Enter to finish the quiz</div>
     {% endif %}
   </div>
 </div>
 
 <script>
-// Обработка клавиши Enter для быстрого перехода к следующему вопросу
+// Handle Enter key for quick transition to next question
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Enter') {
     const nextBtn = document.getElementById('next-btn');
@@ -51,7 +51,7 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-// Автофокус на кнопку для лучшего UX
+// Autofocus on button for better UX
 window.addEventListener('load', function() {
   const nextBtn = document.getElementById('next-btn');
   const finishBtn = document.getElementById('finish-btn');

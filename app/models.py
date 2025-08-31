@@ -32,7 +32,7 @@ class WrongWord(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    word_id = db.Column(db.Integer, nullable=False)  # Убираем внешний ключ к words, так как это другая БД
+    word_id = db.Column(db.Integer, nullable=False)  # Remove foreign key to words as it's a different DB
 
     __table_args__ = (db.UniqueConstraint("user_id", "word_id", name="uq_wrong_words"),)
     

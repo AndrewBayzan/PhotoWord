@@ -12,11 +12,11 @@ def register():
         password = request.form.get("password")
 
         if not username or not password:
-            flash("Введите имя пользователя и пароль")
+            flash("Please enter username and password")
             return render_template("register.html")
 
         if Users.query.filter_by(username=username).first():
-            flash("Пользователь уже существует")
+            flash("User already exists")
             return render_template("register.html")
 
         user = Users(username=username)
@@ -27,7 +27,7 @@ def register():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            flash("Ошибка сохранения пользователя")
+            flash("Error saving user")
             return render_template("register.html")
 
         return redirect(url_for("auth.login"))
@@ -47,7 +47,7 @@ def login():
             session["username"] = user.username
             return redirect(url_for('main.home'))
 
-        flash("Неверный логин или пароль")
+        flash("Invalid username or password")
         return redirect(url_for("auth.login"))
     
     return render_template("login.html")

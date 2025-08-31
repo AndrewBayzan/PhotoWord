@@ -2,21 +2,21 @@
 {% block content %}
 <div class="container mt-4">
   <div class="card shadow p-4">
-    <h2 class="mb-3">Настройки теста</h2>
+    <h2 class="mb-3">Quiz Settings</h2>
     <form method="post">
 
-  <!-- Источник -->
+  <!-- Source -->
   <div class="mb-3">
-    <label for="source" class="form-label">Источник слов</label>
+    <label for="source" class="form-label">Word Source</label>
     <select class="form-select" id="source" name="source" required>
-      <option value="random">Случайные</option>
-      <option value="wrong">Ошибочные</option>
+      <option value="random">Random</option>
+      <option value="wrong">Incorrect</option>
     </select>
   </div>
 
-  <!-- Уровни -->
+  <!-- Levels -->
   <div class="mb-3">
-    <label for="levels" class="form-label">Уровень (можно несколько)</label>
+    <label for="levels" class="form-label">Level (multiple allowed)</label>
     <select class="form-select" id="levels" name="levels" required>
       <option value="MIX">MIX</option>
       <option value="A1">A1</option>
@@ -28,9 +28,9 @@
     </select>
   </div>
 
-  <!-- Кол-во слов -->
+  <!-- Word count -->
   <div class="mb-3">
-    <label for="limit" class="form-label">Количество слов</label>
+    <label for="limit" class="form-label">Number of words</label>
     <select class="form-select" id="limit" name="limit">
       <option value="10">10</option>
       <option value="15">15</option>
@@ -38,7 +38,7 @@
   </div>
 
   <div class="d-flex justify-content-center mt-3">
-  <button type="submit" class="btn btn-primary btn-lg">Начать тест</button>
+  <button type="submit" class="btn btn-primary btn-lg">Start Quiz</button>
   </div>
 </form>
   </div>

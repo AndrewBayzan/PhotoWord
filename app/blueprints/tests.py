@@ -8,12 +8,12 @@ tests_bp = Blueprint("tests_bp", __name__, url_prefix="/tests")
 @tests_bp.route("/settings", methods=["GET", "POST"])
 def settings():
     """
-    Страница настроек. POST сохраняет настройки в сессию и редиректит на /start.
+    Settings page. POST saves settings to session and redirects to /start.
     """
     if request.method == "POST":
-        # получаем значения из формы
+        # get values from form
         source = request.form.get("source", "random")            # random | wrong
-        levels = request.form.getlist("levels")                 # список уровней (может быть пуст)
+        levels = request.form.getlist("levels")                 # list of levels (can be empty)
         try:
             limit = int(request.form.get("limit", 10))
             if limit not in (10, 15):
@@ -24,69 +24,69 @@ def settings():
         session["test_settings"] = {"source": source, "levels": levels, "limit": limit}
         return redirect(url_for("tests_bp.start"))
 
-    # GET — показать форму настроек
+    # GET — show settings form
     return render_template("setting.html")
 
 
 @tests_bp.route("/start")
 def start():
     """
-    Собираем слова по настройкам и сохраняем список id в сессию.
-    Обрабатываем случаи, когда в wrong_words недостаточно слов.
+    Collect words by settings and save list of ids to session.
+    Handle cases when there are not enough words in wrong_words.
     """
     settings = session.get("test_settings")
     if not settings:
-        flash("Настройки теста не заданы — выберите параметры.", "warning")
+        flash("Quiz settings not set — please choose parameters.", "warning")
         return redirect(url_for("tests_bp.settings"))
 
     source = settings.get("source", "random")
     levels = settings.get("levels", [])   # list
     limit = settings.get("limit", 10)
 
-    # --- источник: wrong (слова из wrong_words) ---
+    # --- source: wrong (words from wrong_words) ---
     if source == "wrong":
         user_id = session.get("user_id")
         if not user_id:
-            flash("Требуется вход, чтобы использовать список ошибок.", "warning")
+            flash("Login required to use incorrect words list.", "warning")
             return redirect(url_for("tests_bp.settings"))
 
-        # безопасный способ: сначала взять id слов из WrongWord (user_db),
-        # затем тянуть записи из Words (dictionary bind)
+        # safe way: first get word ids from WrongWord (user_db),
+        # then pull records from Words (dictionary bind)
         wrong_rows = WrongWord.query.filter_by(user_id=user_id).all()
         wrong_ids = [r.word_id for r in wrong_rows]
 
         if not wrong_ids:
-            flash("У вас нет слов в списке ошибок — выберите другой источник.", "info")
+            flash("You have no words in the incorrect list — choose another source.", "info")
             return redirect(url_for("tests_bp.settings"))
 
-        # если выбран фильтр по уровням — применим его при выборке слов
+        # if level filter is selected — apply it when selecting words
         q = Words.query.filter(Words.id.in_(wrong_ids))
-        # levels может содержать e.g. 'MIX' — в этом случае не фильтруем
+        # levels can contain e.g. 'MIX' — in this case we don't filter
         if levels and "MIX" not in [l.upper() for l in levels]:
             q = q.filter(Words.cefr_level.in_(levels))
 
         words = q.order_by(func.random()).limit(limit).all()
 
-        # если после фильтрации по уровням слов стало меньше, чем limit:
+        # if after filtering by levels words became less than limit:
         if not words:
-            flash("Слова на повторение по выбранным уровням не найдены.", "danger")
+            flash("No words found for review at selected levels.", "danger")
             return redirect(url_for("tests_bp.settings"))
         if len(words) < limit:
-            flash(f"Найдено только {len(words)} слов для повторения — тест будет короче.", "info")
+            flash(f"Found only {len(words)} words for review — quiz will be shorter.", "info")
 
     else:
-        # источник: random
+        # source: random
         q = Words.query
         if levels and "MIX" not in [l.upper() for l in levels]:
             q = q.filter(Words.cefr_level.in_(levels))
         words = q.order_by(func.random()).limit(limit).all()
         if not words:
-            flash("Не найдено слов по выбранным уровням.", "danger")
+            flash("No words found for selected levels.", "danger")
             return redirect(url_for("tests_bp.settings"))
 
-    # сохраняем только id-ы слов в сессии (лучше не хранить объекты)
+    # save only word ids in session (better not to store objects)
     session["test_word_ids"] = [w.id for w in words]
-    # очищаем статистику (если была)
+    # clear statistics (if there was any)
     session.pop("test_stats", None)
     return redirect(url_for("tests_bp.run", index=0))
 
@@ -94,27 +94,27 @@ def start():
 @tests_bp.route("/run/<int:index>", methods=["GET"])
 def run(index):
     """
-    Показать одну карточку (index).
-    Если слово отсутствует или пустое — пропускаем вперёд с флешем.
+    Show one card (index).
+    If word is missing or empty — skip forward with flash.
     """
     ids = session.get("test_word_ids")
     if not ids:
-        flash("Тест не инициализирован. Сначала выберите настройки.", "warning")
+        flash("Quiz not initialized. Please select settings first.", "warning")
         return redirect(url_for("tests_bp.settings"))
 
-    # выход за пределы — на finish
+    # out of bounds — go to finish
     if index < 0 or index >= len(ids):
         return redirect(url_for("tests_bp.finish"))
 
     word = Words.query.get(ids[index])
     if not word:
-        # что-то пошло не так: нет слова из списка — пропускаем его
-        flash(f"Слово с id={ids[index]} не найдено — пропускаем.", "warning")
+        # something went wrong: no word from list — skip it
+        flash(f"Word with id={ids[index]} not found — skipping.", "warning")
         return redirect(url_for("tests_bp.run", index=index + 1))
 
     word_text = (word.word or "").strip()
     if not word_text:
-        flash("Слово пустое — пропускаю.", "warning")
+        flash("Word is empty — skipping.", "warning")
         return redirect(url_for("tests_bp.run", index=index + 1))
 
     return render_template(
@@ -129,54 +129,54 @@ def run(index):
 @tests_bp.route("/check/<int:index>", methods=["POST"])
 def check_answer(index):
     """
-    Проверка ответа. Валидация:
-     - сессия/список слов существует
-     - слово найдено
-     - пользователь ввёл достаточно символов (или поле не пустое)
-    Если ввод неполный — возвращаем на ту же карточку с флеш-сообщением.
-    Также обновляем session['test_stats'] и вставляем WrongWord при ошибке (без дублирования).
+    Check answer. Validation:
+     - session/word list exists
+     - word found
+     - user entered enough characters (or field not empty)
+    If input is incomplete — return to the same card with flash message.
+    Also update session['test_stats'] and insert WrongWord on error (without duplication).
     """
     ids = session.get("test_word_ids")
     if not ids:
-        flash("Сессия теста потеряна. Сначала выберите настройки.", "warning")
+        flash("Quiz session lost. Please select settings first.", "warning")
         return redirect(url_for("tests_bp.settings"))
 
     if index < 0 or index >= len(ids):
-        flash("Некорректный индекс карточки.", "danger")
+        flash("Invalid card index.", "danger")
         return redirect(url_for("tests_bp.settings"))
 
     word = Words.query.get(ids[index])
     if not word:
-        flash("Слово не найдено.", "danger")
+        flash("Word not found.", "danger")
         return redirect(url_for("tests_bp.run", index=index + 1))
 
-    # Получаем форму — поддерживаем два варианта:
-    # 1) по-буквенные поля name="letters" -> getlist("letters")
-    # 2) fallback: одно поле name="letters" (noscript) -> get("letters")
+    # Get form — support two options:
+    # 1) letter-by-letter fields name="letters" -> getlist("letters")
+    # 2) fallback: single field name="letters" (noscript) -> get("letters")
     letters = request.form.getlist("letters")
     if not letters:
         single = request.form.get("letters", "")
-        # если пользователь ввёл всё слово в одном поле, разобьём на буквы
+        # if user entered the whole word in one field, split into letters
         if single:
             letters = list(single)
         else:
             letters = []
 
-    # очистка пробелов
+    # clean spaces
     letters = [l.strip() for l in letters]
 
     correct = (word.word or "").strip()
-    # валидация: пользователь должен ввести ровно столько символов, сколько длина слова,
-    # и все поля не должны быть пустыми
+    # validation: user must enter exactly as many characters as word length,
+    # and all fields must not be empty
     if len(letters) != len(correct) or any(ch == "" for ch in letters):
-        flash("Введите все буквы слова (каждое поле должно быть заполнено).", "warning")
+        flash("Please enter all letters of the word (each field must be filled).", "warning")
         return redirect(url_for("tests_bp.run", index=index))
 
     user_answer = "".join(letters).strip().lower()
     correct_answer = correct.lower()
     is_correct = user_answer == correct_answer
 
-    # обновляем статистику в сессии
+    # update statistics in session
     stats = session.get("test_stats", {"correct": 0, "wrong": 0, "total": len(ids)})
     if is_correct:
         stats["correct"] += 1
@@ -184,7 +184,7 @@ def check_answer(index):
         stats["wrong"] += 1
     session["test_stats"] = stats
 
-    # если неверно и пользователь залогинен — добавляем в WrongWord, если ещё нет
+    # if incorrect and user is logged in — add to WrongWord if not already there
     user_id = session.get("user_id")
     if not is_correct and user_id:
         try:
@@ -192,7 +192,7 @@ def check_answer(index):
             if not existing:
                 db.session.add(WrongWord(user_id=user_id, word_id=word.id))
             else:
-                # при необходимости можно обновить timestamp/счётчик; здесь просто оставим запись
+                # if needed can update timestamp/counter; here just leave the record
                 pass
             db.session.commit()
         except Exception as e:
@@ -204,10 +204,10 @@ def check_answer(index):
             except Exception:
                 current_app = None
             if current_app:
-                current_app.logger.exception("Ошибка при записи WrongWord: %s", e)
-            flash("Не удалось сохранить статистику ошибки (серверная ошибка).", "danger")
+                current_app.logger.exception("Error writing WrongWord: %s", e)
+            flash("Failed to save error statistics (server error).", "danger")
 
-    # показываем экран с обратной связью
+    # show feedback screen
     next_index = index + 1
     return render_template(
         "results.html",
@@ -223,10 +223,10 @@ def check_answer(index):
 @tests_bp.route("/finish", methods=["GET"])
 def finish():
     """
-    Финальный экран со статистикой. Очищаем временные тестовые данные.
+    Final screen with statistics. Clear temporary test data.
     """
     stats = session.get("test_stats", {"correct": 0, "wrong": 0, "total": 0})
-    # очищаем сессию, чтобы следующий тест начинался с нуля
+    # clear session so next test starts from zero
     session.pop("test_stats", None)
     session.pop("test_word_ids", None)
     session.pop("test_settings", None)
