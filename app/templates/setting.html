@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow p-4">
+    <h2 class="mb-3">Настройки теста</h2>
+    <form method="post">
+
+  <!-- Источник -->
+  <div class="mb-3">
+    <label for="source" class="form-label">Источник слов</label>
+    <select class="form-select" id="source" name="source" required>
+      <option value="random">Случайные</option>
+      <option value="wrong">Ошибочные</option>
+    </select>
+  </div>
+
+  <!-- Уровни -->
+  <div class="mb-3">
+    <label for="levels" class="form-label">Уровень (можно несколько)</label>
+    <select class="form-select" id="levels" name="levels" required>
+      <option value="MIX">MIX</option>
+      <option value="A1">A1</option>
+      <option value="A2">A2</option>
+      <option value="B1">B1</option>
+      <option value="B2">B2</option>
+      <option value="C1">C1</option>
+      <option value="C2">C2</option>
+    </select>
+  </div>
+
+  <!-- Кол-во слов -->
+  <div class="mb-3">
+    <label for="limit" class="form-label">Количество слов</label>
+    <select class="form-select" id="limit" name="limit">
+      <option value="10">10</option>
+      <option value="15">15</option>
+    </select>
+  </div>
+
+  <div class="d-flex justify-content-center mt-3">
+  <button type="submit" class="btn btn-primary btn-lg">Начать тест</button>
+  </div>
+</form>
+  </div>
+</div>
+{% endblock %}

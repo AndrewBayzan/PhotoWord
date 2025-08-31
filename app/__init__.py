@@ -13,11 +13,12 @@ def create_app():
     from .blueprints.main import main
     from .blueprints.register import auth
     from .blueprints.dict import dict_bp
+    from .blueprints.tests import tests_bp
 
     app.register_blueprint(main)
     app.register_blueprint(auth)
     app.register_blueprint(dict_bp)
-
+    app.register_blueprint(tests_bp, url_prefix="/tests")
 
 
     return app   

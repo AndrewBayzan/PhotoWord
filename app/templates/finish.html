@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-lg text-center p-4 w-50">
+    <div class="card-body">
+      <h2 class="mb-3 text-success">🎉 Тест завершён!</h2>
+
+      <p class="fs-5 mb-1"><strong>Всего слов:</strong> {{ stats.total }}</p>
+      <p class="fs-5 mb-1 text-success"><strong>Правильных:</strong> {{ stats.correct }}</p>
+      <p class="fs-5 mb-3 text-danger"><strong>Неверных:</strong> {{ stats.wrong }}</p>
+
+      <a href="{{ url_for('tests_bp.settings') }}" class="btn btn-primary mt-3">Пройти снова</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,5 +1,7 @@
 from .extensions import db
 from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy import UniqueConstraint
+from datetime import datetime
 
 class Users(db.Model):
     __bind_key__ = None
@@ -24,3 +26,13 @@ class Words(db.Model):
     image_url = db.Column(db.String(200))
     audio_url = db.Column(db.String(200))
     cefr_level = db.Column(db.String(10))
+
+class WrongWord(db.Model):
+    __tablename__ = "wrong_words"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    word_id = db.Column(db.Integer, nullable=False)  # Убираем внешний ключ к words, так как это другая БД
+
+    __table_args__ = (db.UniqueConstraint("user_id", "word_id", name="uq_wrong_words"),)
+    
