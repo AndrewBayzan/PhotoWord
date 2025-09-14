@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from app.extensions import db
-from app.models import Users
+from app.supabase_api import users_db
 from sqlalchemy.exc import IntegrityError
 
 auth = Blueprint("auth", __name__)
@@ -15,18 +14,20 @@ def register():
             flash("Please enter username and password")
             return render_template("register.html")
 
-        if Users.query.filter_by(username=username).first():
+        # Проверяем наличие пользователя через REST API
+        params = {"username": f"eq.{username}"}
+        existing = users_db.get("users", params=params)
+        if existing:
             flash("User already exists")
             return render_template("register.html")
 
-        user = Users(username=username)
-        user.set_password(password)
-        db.session.add(user)
-        
+        # Хэшируем пароль
+        from werkzeug.security import generate_password_hash
+        password_hash = generate_password_hash(password)
+        user_data = {"username": username, "password_hash": password_hash}
         try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
+            users_db.post("users", user_data)
+        except Exception as e:
             flash("Error saving user")
             return render_template("register.html")
 
@@ -41,11 +42,16 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        user = Users.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            session["user_id"] = user.user_id
-            session["username"] = user.username
-            return redirect(url_for('main.home'))
+        # Получаем пользователя через REST API
+        params = {"username": f"eq.{username}"}
+        users = users_db.get("users", params=params)
+        if users:
+            user = users[0]
+            from werkzeug.security import check_password_hash
+            if check_password_hash(user["password_hash"], password):
+                session["user_id"] = user.get("user_id")
+                session["username"] = user.get("username")
+                return redirect(url_for('main.home'))
 
         flash("Invalid username or password")
         return redirect(url_for("auth.login"))

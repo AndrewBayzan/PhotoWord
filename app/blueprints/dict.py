@@ -1,6 +1,5 @@
 from flask import Flask, request, url_for, Blueprint, redirect, render_template
-from app.models import Words
-from app.extensions import db
+from app.supabase_api import dictionary_db
 
 
 dict_bp = Blueprint("dict_bp", __name__)
@@ -13,13 +12,16 @@ def dict_home():
 
 @dict_bp.route("/dictionary/<letter>")
 def dict_by_letter(letter):
-    words = Words.query.filter(Words.word.ilike(f"{letter}%"))\
-                       .order_by(Words.word.asc()).all()
+    # Получаем слова по первой букве через REST API
+    params = {"word": f"ilike.{letter}%", "order": "word.asc"}
+    words = dictionary_db.get("words", params=params)
     return render_template("dict_by_letter.html", letter=letter.upper(), words=words)
                 
 @dict_bp.route("/dictionary/word/<word>")
 def dict_word(word):
-    entry = Words.query.filter_by(word=word).first_or_404()
+    params = {"word": f"eq.{word}"}
+    entries = dictionary_db.get("words", params=params)
+    entry = entries[0] if entries else None
     return render_template("dict_word.html", entry=entry)
 
 @dict_bp.route("/search")
@@ -27,10 +29,6 @@ def dict_search():
     query = request.args.get("q", "").strip()
     words = []
     if query:
-        words = (
-            Words.query
-            .filter(Words.word.ilike(f"%{query}%"))
-            .order_by(Words.word.asc())
-            .all()
-        )
+        params = {"word": f"ilike.%{query}%", "order": "word.asc"}
+        words = dictionary_db.get("words", params=params)
     return render_template("dict_home.html", words=words, query=query)
