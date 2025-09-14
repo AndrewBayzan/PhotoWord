@@ -1,15 +1,13 @@
 from flask import Flask, Blueprint
-from app.extensions import db, migrate
-from app.models import Users, Words
-
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
+    
+    # Инициализация Supabase API клиентов
+    
 
-    db.init_app(app)
-    migrate.init_app(app, db)
-
+    # Регистрация blueprints
     from .blueprints.main import main
     from .blueprints.register import auth
     from .blueprints.dict import dict_bp
