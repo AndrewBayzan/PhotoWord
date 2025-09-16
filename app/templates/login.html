@@ -11,9 +11,15 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
 <div class="d-flex align-items-center justify-content-center vh-100">
     <div class="card shadow p-4" style="min-width: 350px; background-color: #2c3034; color: white;">
         <h3 class="text-center mb-3" style="color: #9370DB;">Login</h3>
+=======
+<div class="bg-light d-flex align-items-center justify-content-center vh-100">
+    <div class="card shadow p-4" style="min-width: 350px;">
+        <h3 class="text-center mb-3">Login</h3>
+>>>>>>> 4396087adfe3167c511c9ac4e6743eb1a48393af
 
     <!-- display flash messages -->
     {% with messages = get_flashed_messages() %}
@@ -41,7 +47,15 @@
     </form>
 
     <div class="mt-3 text-center">
+<<<<<<< HEAD
         <small style="color: white;">Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: #9370DB; text-decoration: none;">Register</a></small>
     </div>
 </div>
+=======
+        <small>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></small>
+    </div>
+</div>
+
+</body>
+>>>>>>> 4396087adfe3167c511c9ac4e6743eb1a48393af
 {% endblock %}
