@@ -3,5 +3,34 @@
 {% block title %} Home page {% endblock %}
 
 {% block content %}
-<h1> This is the Home Page </h1>
+<div class="container mt-5">
+    {% if session.get("user_id") %}
+        <div class="alert alert-success">
+            Welcome, <strong>{{ session.get("username") }}</strong>! 🎉
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Welcome, guest! Please 
+            <a href="{{ url_for('auth.login') }}">login</a> or 
+            <a href="{{ url_for('auth.register') }}">register</a>.
+        </div>
+    {% endif %}
+
+    <div class="card shadow-sm p-4 mt-4">
+        <h4>Home Page</h4>
+        <p class="text-muted">
+            Welcome to the English vocabulary learning platform!
+            This site is designed for those who want to expand their vocabulary and reinforce new knowledge
+            in a convenient format.<br>
+            <strong>What awaits you:</strong><br>
+            <ul>
+                <li>English dictionary sorted alphabetically.</li>
+                <li>Detailed card for each word: transcription, description and illustration for better memorization.</li>
+                <li>Ability to take a quiz of 10 random words of the selected level to test and strengthen your knowledge</li>
+            </ul>
+            Register, choose your level and start learning English words today!
+        </p>
+    </div>
+</div>
+
 {% endblock %}

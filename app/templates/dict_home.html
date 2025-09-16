@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Dictionary</h2>
+
+    <!-- 🔍 Search bar -->
+    <form method="get" action="{{ url_for('dict_bp.dict_search') }}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search a word..." value="{{ query or '' }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- 🔤 Alphabet navigation (always visible at the top) -->
+    <h5>Browse by letter:</h5>
+    <div class="d-flex flex-wrap mb-3">
+        {% for letter in letters %}
+            <a href="{{ url_for('dict_bp.dict_by_letter', letter=letter.lower()) }}"
+               class="btn btn-outline-secondary btn-sm m-1 {% if active_letter == letter.lower() %}active{% endif %}">
+                {{ letter }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- Search results or letter-based list -->
+    {% if query %}
+        <h5>Search results for "<b>{{ query }}</b>":</h5>
+        {% if words %}
+            <ul class="list-group">
+                {% for word in words %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('dict_bp.dict_word', word=word.word) }}">{{ word.word }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">No words found.</p>
+        {% endif %}
+    {% elif active_letter %}
+        <h5>Words starting with "{{ active_letter|upper }}":</h5>
+        {% if words %}
+            <ul class="list-group">
+                {% for word in words %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('dict_bp.dict_word', word=word.word) }}">{{ word.word }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">No words for this letter.</p>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">Select a letter above to browse words.</p>
+    {% endif %}
+</div>
+{% endblock %}

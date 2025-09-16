@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 d-flex justify-content-center">
+  <div class="card shadow-lg w-75 text-center">
+    <div class="card-body">
+      
+      <!-- Word -->
+      <h2 class="card-title fs-1">{{ entry.word }}</h2>
+      
+      <!-- Transcription -->
+      {% if entry.transcription %}
+        <p class="text-muted fs-5">[{{ entry.transcription }}]</p>
+      {% endif %}
+
+      <!-- Definition -->
+      <p class="fs-5"><strong>Definition:</strong> {{ entry.definition }}</p>
+
+      <!-- Audio button -->
+      {% if entry.audio_url %}
+        <div class="mt-3">
+          <button class="btn btn-primary" onclick="playAudio()">
+            🔊 Pronounce
+          </button>
+          <audio id="word-audio" src="{{ entry.audio_url }}"></audio>
+        </div>
+        <script>
+          function playAudio() {
+            const audio = document.getElementById("word-audio");
+            audio.play();
+          }
+        </script>
+      {% endif %}
+
+      <!-- Image -->
+      {% if entry.image_url %}
+        <div class="mt-4">
+          <img src="{{ entry.image_url }}" alt="{{ entry.word }}"
+               class="img-fluid rounded shadow-sm"
+               style="width: 300px; height: 300px; object-fit: cover;">
+        </div>
+      {% endif %}
+
+      <!-- CEFR Level -->
+      <p class="mt-3">
+        <span class="badge bg-info text-dark fs-6">Level: {{ entry.cefr_level }}</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Back button -->
+<div class="container text-center mt-3">
+  <a href="{{ url_for('dict_bp.dict_by_letter', letter=entry.word[0]|upper) }}"
+     class="btn btn-secondary">Back to words</a>
+</div>
+{% endblock %}
