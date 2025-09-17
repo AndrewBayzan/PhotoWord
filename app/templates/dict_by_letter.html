@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-3">Words starting with "{{ letter }}"</h1>
+
+  {% if words %}
+    <ul class="list-group">
+      {% for w in words %}
+        <li class="list-group-item">
+          <a href="{{ url_for('dict_bp.dict_word', word=w.word) }}" class="text-decoration-none">
+            {{ w.word }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-warning">There are no words for this letter yet.</div>
+  {% endif %}
+
+  <a href="{{ url_for('dict_bp.dict_home') }}" class="btn btn-secondary mt-3">Back</a>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 d-flex justify-content-center">
+  <div class="card shadow-lg w-75 text-center">
+    <div class="card-body">
+
+      <!-- Show flash messages (if base.html doesn't do this) -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-3">
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Image -->
+      {% if word.image_url %}
+        <div class="mb-4 d-flex justify-content-center">
+          <img src="{{ word.image_url }}" alt="image"
+               class="img-fluid rounded shadow-sm mx-auto d-block"
+               style="max-height: 250px; object-fit: contain;">
+        </div>
+      {% endif %}
+
+      <!-- Definition -->
+      <p class="fs-5"><strong>Definition:</strong> {{ word.definition }}</p>
+
+      <!-- Answer input -->
+      <form method="post" action="{{ url_for('tests_bp.check_answer', index=current_index) }}">
+        <div id="answer-fields" class="d-flex justify-content-center mb-3 flex-wrap"></div>
+        <button type="submit" class="btn btn-success">Submit</button>
+        <div class="mt-2 text-muted small">💡 Press Enter for quick answer</div>
+      </form>
+
+      <div class="mt-3 text-muted">Word {{ current_index+1 }} of {{ total }}</div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const wordLength = "{{ word_length | tojson }}";
+const container = document.getElementById("answer-fields");
+
+// generate inputs
+for (let i = 0; i < wordLength; i++) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.name = "letters";
+  input.maxLength = 1;
+  input.className = "form-control m-1";
+  input.style.width = "40px";
+  input.style.textAlign = "center";
+  // Clear value when creating field
+  input.value = "";
+  container.appendChild(input);
+}
+
+// behavior: move forward on input and backward on backspace
+const inputs = container.querySelectorAll("input");
+inputs.forEach((input, idx) => {
+  input.addEventListener("input", (e) => {
+    if (e.target.value.length === 1 && idx < inputs.length - 1) {
+      inputs[idx + 1].focus();
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value && idx > 0) {
+      inputs[idx - 1].focus();
+    } else if (e.key === "ArrowLeft" && idx > 0) {
+      inputs[idx - 1].focus();
+    } else if (e.key === "ArrowRight" && idx < inputs.length - 1) {
+      inputs[idx + 1].focus();
+    } else if (e.key === "Enter") {
+      // Submit form when pressing Enter on any field
+      e.preventDefault();
+      const form = input.closest('form');
+      if (form) {
+        form.submit();
+      }
+    }
+  });
+});
+
+// autofocus on first input and clear all fields when page loads
+window.addEventListener('load', function() {
+  // Clear all input fields
+  inputs.forEach(input => {
+    input.value = "";
+  });
+  
+  // Focus on first input
+  if (inputs.length) {
+    inputs[0].focus();
+  }
+});
+
+// Additional clearing when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+  inputs.forEach(input => {
+    input.value = "";
+  });
+  
+  if (inputs.length) {
+    inputs[0].focus();
+  }
+});
+</script>
+{% endblock %}
